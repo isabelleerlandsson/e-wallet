@@ -70,7 +70,7 @@ function CardList({ cards, setCards, isEditing }) {
                   card.active ? "active-card" : ""
                 } ${cardType}`}
                 onClick={() => handleCardClick(i)}
-                key={card.id}
+                key={i}
               >
                 <img src={cardChip} alt="Card Chip" className="card-chip" />
                 <img src={nfcLogo} alt="NFC Chip" className="nfc-chip" />
@@ -120,7 +120,7 @@ function CardList({ cards, setCards, isEditing }) {
                   card.active ? "active-card" : ""
                 } ${cardType}`}
                 onClick={() => handleCardClick(i)}
-                key={card.id}
+                key={i}
               >
                 <img src={cardChip} alt="Card Chip" className="card-chip" />
                 <img src={nfcLogo} alt="NFC Chip" className="nfc-chip" />
@@ -156,7 +156,7 @@ function CardList({ cards, setCards, isEditing }) {
             );
           }
 
-          return null; // Inget returnerat för aktiva kort här
+          return null;
         })}
       </div>
     </div>

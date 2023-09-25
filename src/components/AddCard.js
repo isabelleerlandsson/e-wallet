@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import cardChip from "./img/chip.png";
 import nfcLogo from "./img/nfc.png";
@@ -31,7 +31,7 @@ function CardPreview({ card, cardType, cardLogos }) {
   );
 }
 
-function AddCard({ cards, setCards }) {
+function AddCard({ cards, setCards, randomUser }) {
   const currentYear = new Date().getFullYear();
   const navigate = useNavigate();
 
@@ -49,6 +49,13 @@ function AddCard({ cards, setCards }) {
   const [expireMonth, setExpireMonth] = useState("");
   const [expireYear, setExpireYear] = useState("");
   const [ccv, setCcv] = useState("");
+
+  useEffect(() => {
+    if (randomUser) {
+      setFirstName(randomUser.firstName);
+      setLastName(randomUser.lastName);
+    }
+  }, [randomUser]);
 
   const cardType = vendor.toLowerCase().replace(/\s+/g, "");
 
@@ -72,8 +79,8 @@ function AddCard({ cards, setCards }) {
     const newCard = {
       vendor,
       cardNumber,
-      firstName,
-      lastName,
+      firstName: randomUser ? randomUser.firstName : firstName,
+      lastName: randomUser ? randomUser.lastName : lastName,
       expireMonth,
       expireYear,
       ccv,
@@ -131,6 +138,7 @@ function AddCard({ cards, setCards }) {
           {/* FirstName */}
           <input
             type="text"
+            readOnly
             value={firstName}
             onChange={(e) => {
               if (
@@ -146,6 +154,7 @@ function AddCard({ cards, setCards }) {
           {/* LastName */}
           <input
             type="text"
+            readOnly
             value={lastName}
             onChange={(e) => {
               if (
