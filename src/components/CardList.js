@@ -5,51 +5,27 @@ import mastercardLogo from "./img/mastercard-logo.png";
 import visaLogo from "./img/visa-logo.png";
 import amexLogo from "./img/amex-logo.png";
 import nfcLogo from "./img/nfc.png";
+import { useSelector, useDispatch } from "react-redux";
+import { selectCards, deleteCard, setActiveCard } from "../walletSlice";
 
-function CardList({ cards, setCards, isEditing }) {
+function CardList({ isEditing }) {
+  const cards = useSelector(selectCards);
+  const dispatch = useDispatch();
+
   const cardLogos = {
     mastercard: mastercardLogo,
     visa: visaLogo,
     americanexpress: amexLogo,
   };
 
-  // Ta bort kort
-  function deleteCard(cardId, event) {
+  function handleDeleteCard(cardId, event) {
     event.stopPropagation();
-    if (cards[cardId].active) {
-      alert(
-        "Det går inte att ta bort ett aktivt kort. Vänligen byt kort först!"
-      );
-      return;
-    }
-
-    if (cards.length <= 1) {
-      alert(
-        "Du måste ha minst ett kort i din plånbok. Vänligen lägg till ett nytt och prova igen!"
-      );
-      return;
-    }
-
-    const updatedCards = cards.filter((_, id) => id !== cardId);
-    setCards(updatedCards);
+    dispatch(deleteCard(cardId));
   }
-  // ---------------------------------------------
 
-  // Position aktiva kortet
-  function handleCardClick(clickedId) {
-    const updatedCards = cards.map((card, id) => {
-      if (id === clickedId) {
-        return { ...card, active: true };
-      } else {
-        return { ...card, active: false };
-      }
-    });
-
-    const activeCard = updatedCards[clickedId];
-    updatedCards.splice(clickedId, 1);
-    updatedCards.unshift(activeCard);
-
-    setCards(updatedCards);
+  function handleCardClick(clickedId, event) {
+    event.stopPropagation();
+    dispatch(setActiveCard(clickedId));
   }
   // ---------------------------------------------
 
@@ -69,9 +45,10 @@ function CardList({ cards, setCards, isEditing }) {
                 className={`card preview ${
                   card.active ? "active-card" : ""
                 } ${cardType}`}
-                onClick={() => handleCardClick(i)}
+                onClick={(event) => handleCardClick(i, event)}
                 key={i}
               >
+                {/* Kortets innehåll */}
                 <img src={cardChip} alt="Card Chip" className="card-chip" />
                 <img src={nfcLogo} alt="NFC Chip" className="nfc-chip" />
 
@@ -98,10 +75,11 @@ function CardList({ cards, setCards, isEditing }) {
                   {isEditing && (
                     <i
                       className="fa fa-trash"
-                      onClick={(event) => deleteCard(i, event)}
+                      onClick={(event) => handleDeleteCard(i, event)}
                     ></i>
-                  )}{" "}
+                  )}
                 </span>
+                {/* -------------------------- */}
               </div>
             );
           }
@@ -119,9 +97,10 @@ function CardList({ cards, setCards, isEditing }) {
                 className={`card preview ${
                   card.active ? "active-card" : ""
                 } ${cardType}`}
-                onClick={() => handleCardClick(i)}
+                onClick={(event) => handleCardClick(i, event)}
                 key={i}
               >
+                {/* Kortets innehåll */}
                 <img src={cardChip} alt="Card Chip" className="card-chip" />
                 <img src={nfcLogo} alt="NFC Chip" className="nfc-chip" />
 
@@ -148,10 +127,11 @@ function CardList({ cards, setCards, isEditing }) {
                   {isEditing && (
                     <i
                       className="fa fa-trash"
-                      onClick={(event) => deleteCard(i, event)}
+                      onClick={(event) => handleDeleteCard(i, event)}
                     ></i>
-                  )}{" "}
+                  )}
                 </span>
+                {/* -------------------------- */}
               </div>
             );
           }

@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
+import { addCard } from "../walletSlice";
 import cardChip from "./img/chip.png";
 import nfcLogo from "./img/nfc.png";
 import visaLogo from "./img/visa-logo.png";
@@ -31,9 +33,14 @@ function CardPreview({ card, cardType, cardLogos }) {
   );
 }
 
-function AddCard({ cards, setCards, randomUser }) {
+function AddCard({}) {
   const currentYear = new Date().getFullYear();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const cards = useSelector((state) => state.wallet);
+  const user = useSelector((state) => state.wallet.user);
+  const initialFirstName = cards && cards[0] && cards[0].firstName;
+  const initialLastName = cards && cards[0] && cards[0].lastName;
 
   const cardLogos = {
     mastercard: mastercardLogo,
@@ -44,49 +51,72 @@ function AddCard({ cards, setCards, randomUser }) {
   // Uppdatera värde
   const [vendor, setVendor] = useState("");
   const [cardNumber, setCardNumber] = useState("");
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
+  const [firstName, setFirstName] = useState(
+    initialFirstName ? initialFirstName : ""
+  );
+  const [lastName, setLastName] = useState(
+    initialLastName ? initialLastName : ""
+  );
   const [expireMonth, setExpireMonth] = useState("");
   const [expireYear, setExpireYear] = useState("");
   const [ccv, setCcv] = useState("");
 
   useEffect(() => {
-    if (randomUser) {
-      setFirstName(randomUser.firstName);
-      setLastName(randomUser.lastName);
+    if (user) {
+      setFirstName(user.firstName);
+      setLastName(user.lastName);
     }
-  }, [randomUser]);
+  }, [user]);
 
   const cardType = vendor.toLowerCase().replace(/\s+/g, "");
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    navigate("/cards"); // Navigerar vidare till cards när man lagt till et nytt.
 
     // Max 4 kort
-    if (cards.length >= 4) {
+    if (cards && cards.cards && cards.cards.length >= 4) {
       alert("Du kan bara ha maximalt 4 kort i din e-wallet!");
       return;
     }
 
-    // Validera input här om du vill, till exempel:
+    // Max och minst 16 siffror
     if (cardNumber.replace(/[^0-9]/g, "").length !== 16) {
       alert("Kortnumret måste ha 16 siffror");
       return;
     }
 
+    // Måste ange månad
+    if (!expireMonth || expireMonth === "") {
+      alert("Du måste ange en utgångsmånad");
+      return;
+    }
+
+    // Måste ange år
+    if (!expireYear || expireYear === "") {
+      alert("Du måste ange ett utgångsår");
+      return;
+    }
+
+    // Måste ange CCV
+    if (!ccv || ccv.length !== 3) {
+      alert("Du måste ange ett korrekt CCV");
+      return;
+    }
+
+    navigate("/cards"); // Navigerar vidare till cards när man lagt till et nytt.
+
     // Lägg till nya kortet till cards-arrayen
     const newCard = {
       vendor,
       cardNumber,
-      firstName: randomUser ? randomUser.firstName : firstName,
-      lastName: randomUser ? randomUser.lastName : lastName,
+      firstName,
+      lastName,
       expireMonth,
       expireYear,
       ccv,
     };
 
-    setCards([...cards, newCard]);
+    dispatch(addCard(newCard));
 
     // Rensar efter sparat kort
     setVendor("");
@@ -133,37 +163,15 @@ function AddCard({ cards, setCards, randomUser }) {
         </div>
       )}
 
+      {/* FORMULÄR FÖR NYTT KORT */}
       <form onSubmit={handleSubmit}>
+        {/* För- och efternamn*/}
         <div>
-          {/* FirstName */}
-          <input
-            type="text"
-            readOnly
-            value={firstName}
-            onChange={(e) => {
-              if (
-                e.target.value === "" ||
-                /^[a-zA-Z-'\s]+$/.test(e.target.value)
-              ) {
-                setFirstName(e.target.value);
-              }
-            }}
-            placeholder="Förnamn"
-          />
-
-          {/* LastName */}
+          <input type="text" readOnly value={firstName} placeholder="Förnamn" />
           <input
             type="text"
             readOnly
             value={lastName}
-            onChange={(e) => {
-              if (
-                e.target.value === "" ||
-                /^[a-zA-Z-'\s]+$/.test(e.target.value)
-              ) {
-                setLastName(e.target.value);
-              }
-            }}
             placeholder="Efternamn"
           />
         </div>
@@ -186,11 +194,11 @@ function AddCard({ cards, setCards, randomUser }) {
             type="text"
             value={cardNumber}
             onChange={(e) => {
-              const pureNumbers = e.target.value.replace(/\D/g, "");
-              if (pureNumbers.length <= 16) {
-                const formatted = pureNumbers.replace(/(\d{4})(?=\d)/g, "$1 ");
-                setCardNumber(formatted);
-              }
+              const formatted = e.target.value
+                .replace(/\D/g, "")
+                .slice(0, 16)
+                .replace(/(\d{4})(?=\d)/g, "$1 ");
+              setCardNumber(formatted);
             }}
             placeholder="Kortnummer"
             maxLength="19"

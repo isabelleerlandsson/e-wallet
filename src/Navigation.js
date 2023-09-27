@@ -18,6 +18,7 @@ function Navigation({ setIsEditing, isEditing }) {
     };
   }, []);
 
+  // MENYN
   return (
     <div className="menu">
       <button
