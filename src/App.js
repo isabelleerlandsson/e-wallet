@@ -3,14 +3,12 @@ import AddCard from "./components/AddCard";
 import CardList from "./components/CardList";
 import Navigation from "./Navigation";
 import React, { useState, useEffect } from "react";
-import { useSelector, useDispatch } from "react-redux";
-import { selectCards, getUser } from "./walletSlice";
+import { useDispatch } from "react-redux";
+import { getUser } from "./walletSlice";
 import "./styles.css";
 
 function App() {
   const [isEditing, setIsEditing] = useState(false);
-  const cards = useSelector(selectCards);
-
   const dispatch = useDispatch();
 
   useEffect(() => {
